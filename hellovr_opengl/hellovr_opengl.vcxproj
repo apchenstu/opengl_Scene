@@ -98,7 +98,11 @@
     <ClInclude Include="..\shared\Matrices.h" />
     <ClInclude Include="..\shared\pathtools.h" />
     <ClInclude Include="..\shared\Vectors.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="shader.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="hellovr_opengl.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
