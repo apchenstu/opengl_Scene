@@ -1,7 +1,7 @@
 #ifndef SHADER_H
 #define SHADER_H
 
-#include<glew.h>
+#include"shared/glew.h"
 #include<iostream>
 #include<fstream>
 #include<sstream>
@@ -46,7 +46,7 @@ public:
 		const GLubyte *vendor = glGetString(GL_VENDOR);
 		const GLubyte *version = glGetString(GL_VERSION);
 		const GLubyte *glslVersion =
-			glGetString(GL_SHADING_LANGUAGE_VERSION);
+		glGetString(GL_SHADING_LANGUAGE_VERSION);
 		GLint major, minor;
 		glGetIntegerv(GL_MAJOR_VERSION, &major);
 		glGetIntegerv(GL_MINOR_VERSION, &minor);

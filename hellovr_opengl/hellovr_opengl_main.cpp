@@ -7,65 +7,90 @@
 #include <stdio.h>
 #include <string>
 #include <cstdlib>
+#include<glut.h>
 
 #include <openvr.h>
 
 #include "shared/lodepng.h"
 #include "shared/Matrices.h"
 #include "shared/pathtools.h"
+#include "shared/SOIL.h"
 
 #include"shader.h"
 
-Shader skyboxShader;
-GLuint VertexArrayID;
+GLuint skyboxShader;
+Shader skyboxShader_1;
+GLuint skyVAO,skyVBO,EBO;
 GLuint VertexBuffer;
 GLuint width, height;
-GLuint Texture;
+GLuint Texture_left,Texture_right;
 unsigned char * TextureImage;
 std::vector<const GLchar*> TextureImage_c;
-static const float  gl_vertex_buffer_data[] = {
-	-5.0f, 5.0f, -5.0f,
-	-5.0f, -5.0f, -5.0f,
-	5.0f, -5.0f, -5.0f,
-	5.0f, -5.0f, -5.0f,
-	5.0f, 5.0f, -5.0f,
-	-5.0f, 5.0f, -5.0f,
+GLfloat vertices[] = {
+	//-1.0f, -1.0f, 0.0f,
+	//1.0f, -1.0f, 0.0f,
+	//0.0f, 1.0f, 0.0f,
 
-	-5.0f, -5.0f, 5.0f,
-	-5.0f, -5.0f, -5.0f,
-	-5.0f, 5.0f, -5.0f,
-	-5.0f, 5.0f, -5.0f,
-	-5.0f, 5.0f, 5.0f,
-	-5.0f, -5.0f, 5.0f,
+	-1.0f, -1.0f, -1.0f, 0.0f, 0.0f,
+	1.0f, -1.0f, -1.0f, 1.0f, 0.0f,
+	1.0f, 1.0f, -1.0f, 1.0f, 1.0f,
+	1.0f, 1.0f, -1.0f, 1.0f, 1.0f,
+	-1.0f, 1.0f, -1.0f, 0.0f, 1.0f,
+	-1.0f, -1.0f, -1.0f, 0.0f, 0.0f,
 
-	5.0f, -5.0f, -5.0f,
-	5.0f, -5.0f, 5.0f,
-	5.0f, 5.0f, 5.0f,
-	5.0f, 5.0f, 5.0f,
-	5.0f, 5.0f, -5.0f,
-	5.0f, -5.0f, -5.0f,
+	-1.0f, -1.0f, 1.0f, 0.0f, 0.0f,
+	1.0f, -1.0f, 1.0f, 1.0f, 0.0f,
+	1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+	1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+	-1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+	-1.0f, -1.0f, 1.0f, 0.0f, 0.0f,
 
-	-5.0f, -5.0f, 5.0f,
-	-5.0f, 5.0f, 5.0f,
-	5.0f, 5.0f, 5.0f,
-	5.0f, 5.0f, 5.0f,
-	5.0f, -5.0f, 5.0f,
-	-5.0f, -5.0f, 5.0f,
+	-1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+	-1.0f, 1.0f, -1.0f, 1.0f, 1.0f,
+	-1.0f, -1.0f, -1.0f, 0.0f, 1.0f,
+	-1.0f, -1.0f, -1.0f, 0.0f, 1.0f,
+	-1.0f, -1.0f, 1.0f, 0.0f, 0.0f,
+	-1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
 
-	-5.0f, 5.0f, -5.0f,
-	5.0f, 5.0f, -5.0f,
-	5.0f, 5.0f, 5.0f,
-	5.0f, 5.0f, 5.0f,
-	-5.0f, 5.0f, 5.0f,
-	-5.0f, 5.0f, -5.0f,
+	1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+	1.0f, 1.0f, -1.0f, 1.0f, 1.0f,
+	1.0f, -1.0f, -1.0f, 0.0f, 1.0f,
+	1.0f, -1.0f, -1.0f, 0.0f, 1.0f,
+	1.0f, -1.0f, 1.0f, 0.0f, 0.0f,
+	1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
 
-	-5.0f, -5.0f, -5.0f,
-	-5.0f, -5.0f, 5.0f,
-	5.0f, -5.0f, -5.0f,
-	5.0f, -5.0f, -5.0f,
-	-5.0f, -5.0f, 5.0f,
-	5.0f, -5.0f, 5.0f
+	-1.0f, -1.0f, -1.0f, 0.0f, 1.0f,
+	1.0f, -1.0f, -1.0f, 1.0f, 1.0f,
+	1.0f, -1.0f, 1.0f, 1.0f, 0.0f,
+	1.0f, -1.0f, 1.0f, 1.0f, 0.0f,
+	-1.0f, -1.0f, 1.0f, 0.0f, 0.0f,
+	-1.0f, -1.0f, -1.0f, 0.0f, 1.0f,
 
+	-1.0f, 1.0f, -1.0f, 0.0f, 1.0f,
+	1.0f, 1.0f, -1.0f, 1.0f, 1.0f,
+	1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+	1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+	-1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
+	-1.0f, 1.0f, -1.0f, 0.0f, 1.0f
+};
+GLuint indices[] = {  // Note that we start from 0!
+	0, 1, 3, // First Triangle
+	1, 2, 3,  // Second Triangle
+
+	//4, 5, 7,
+	//5, 6, 7,
+
+	//8, 9, 11,
+	//9, 11, 10,
+
+	//12, 13, 15,
+	//13, 15, 16,
+
+	//16, 17, 19,
+	//17, 19, 18,
+
+	//20, 21, 23,
+	//21, 23, 22
 };
 void LoadTexture();
 
@@ -124,6 +149,8 @@ public:
 	bool SetupStereoRenderTargets();
 	void SetupDistortion();
 	void SetupCameras();
+	void SetLookat(GLuint mytex);
+	GLuint SetShader(const GLchar * frameSourcePath);
 
 	void RenderStereoTargets();
 	void RenderDistortion();
@@ -132,6 +159,8 @@ public:
 	Matrix4 GetHMDMatrixProjectionEye( vr::Hmd_Eye nEye );
 	Matrix4 GetHMDMatrixPoseEye( vr::Hmd_Eye nEye );
 	Matrix4 GetCurrentViewProjectionMatrix( vr::Hmd_Eye nEye );
+	Vector4 GetLookat();
+
 	void UpdateHMDMatrixPose();
 
 	Matrix4 ConvertSteamVRMatrixToMatrix4( const vr::HmdMatrix34_t &matPose );
@@ -419,6 +448,7 @@ bool CMainApplication::BInit()
 	if( m_bDebugOpenGL )
 		SDL_GL_SetAttribute( SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG );
 
+	//glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
 	m_pWindow = SDL_CreateWindow( "hellovr_sdl", nWindowPosX, nWindowPosY, m_nWindowWidth, m_nWindowHeight, unWindowFlags );
 	if (m_pWindow == NULL)
 	{
@@ -518,17 +548,22 @@ bool CMainApplication::BInitGL()
 	//SetupTexturemaps();
 	//SetupScene();
 
-	glGenVertexArrays(1, &VertexArrayID);
+	glGenVertexArrays(1, &skyVAO);
 	glGenBuffers(1, &VertexBuffer);
 
-	glBindVertexArray(VertexArrayID);
+	glBindVertexArray(skyVAO);
 	glBindBuffer(GL_ARRAY_BUFFER, VertexBuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(gl_vertex_buffer_data), gl_vertex_buffer_data, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void *)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (void *)0);
 	glEnableVertexAttribArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (void *)(3*sizeof(GLfloat)));
+	glEnableVertexAttribArray(1);
+
+	
 	glBindVertexArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	
 
 	LoadTexture();
 	SetupCameras();
@@ -537,31 +572,54 @@ bool CMainApplication::BInitGL()
 
 	SetupRenderModels();
 
+	//glGenVertexArrays(1, &skyVAO);
+	//glBindVertexArray(skyVAO);
+	//glGenBuffers(1, &VertexBuffer);
+	//glBindBuffer(GL_ARRAY_BUFFER, leftEyeDesc.m_nRenderFramebufferId);
+	//glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	//glBindVertexArray(0);
+	//glGenVertexArrays(1, &skyVAO);
+	//glBindVertexArray(skyVAO);
+	//glBindBuffer(GL_ARRAY_BUFFER, leftEyeDesc.m_nRenderFramebufferId);
+	//glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	//glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void *)0);
+
+
+	//glBindVertexArray(skyVAO);
+	//glBindBuffer(GL_ARRAY_BUFFER, rightEyeDesc.m_nRenderFramebufferId);
+	//glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	//glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void *)0);
+	//glBindVertexArray(0);
+	//glBindBuffer(GL_ARRAY_BUFFER, 0);
+
 	return true;
 }
 
 void LoadTexture()
 {
-	TextureImage_c.push_back("C:/Users/cap/Desktop/openvr-master/samples/bin/skybox/right.png");
-	TextureImage_c.push_back("C:/Users/cap/Desktop/openvr-master/samples/bin/skybox/left.png");
-	TextureImage_c.push_back("C:/Users/cap/Desktop/openvr-master/samples/bin/skybox/top.png");
-	TextureImage_c.push_back("C:/Users/cap/Desktop/openvr-master/samples/bin/skybox/bottom.png");
-	TextureImage_c.push_back("C:/Users/cap/Desktop/openvr-master/samples/bin/skybox/back.png");
-	TextureImage_c.push_back("C:/Users/cap/Desktop/openvr-master/samples/bin/skybox/front.png");
+	//glClearColor(1.0f, 0.0f, 0.0f, 0.0f);
+	//glShadeModel(GL_SMOOTH);
 
-	glGenTextures(1, &Texture);
-	glBindTexture(GL_TEXTURE_2D, Texture);
+	TextureImage_c.push_back("./picture/left.png");
+	TextureImage_c.push_back("./picture/right.png");
 
-	for (int i = 0; i < TextureImage_c.size(); i++)
-	{
-		lodepng_decode32_file(&TextureImage, &width, &height, TextureImage_c[i]);
-		glTexImage2D(GL_TEXTURE_2D + i, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, TextureImage);
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
+	glGenTextures(1, &Texture_left);
+	glGenTextures(1,&Texture_right);
 
+	glBindTexture(GL_TEXTURE_2D, Texture_left);
+	lodepng_decode32_file(&TextureImage, &width, &height, TextureImage_c[0]);
+	//TextureImage = SOIL_load_image(TextureImage_c[0], &width, &height, 0, SOIL_LOAD_RGB);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, TextureImage);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glBindTexture(GL_TEXTURE_2D, Texture_right);
+	lodepng_decode32_file(&TextureImage, &width, &height, TextureImage_c[1]);
+	//TextureImage = SOIL_load_image(TextureImage_c[1], &width, &height, 0, SOIL_LOAD_RGB);
+	glTexImage2D(GL_TEXTURE_2D , 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, TextureImage);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
 
 		//unsigned char * dst;
 		//dst = (unsigned char *)malloc(sizeof(unsigned)*width*height*4);
@@ -572,7 +630,7 @@ void LoadTexture()
 
 		if (TextureImage)
 			free(TextureImage);
-		glBindTexture(GL_TEXTURE_2D,0);
+	//	glBindTexture(GL_TEXTURE_2D,0);
 }
 
 //-----------------------------------------------------------------------------
@@ -889,7 +947,9 @@ GLuint CMainApplication::CompileGLShader( const char *pchShaderName, const char 
 //-----------------------------------------------------------------------------
 bool CMainApplication::CreateAllShaders()
 {
-	Shader skyboxShader("../.Triangle.vs",".../Triangle.frag");
+	skyboxShader = SetShader("./wrap.frag");
+	//Shader skyboxShader("J:/opengl/Project/openvr-master/samples/hellovr_opengl/Triangle.vs", "J:/opengl/Project/openvr-master/samples/hellovr_opengl/Triangle.frag");
+	//Shader skyboxShader("J:/opengl/Project/Triangle/Triangle.vs", "J:/opengl/Project/Triangle/Triangle.frag");
 	//m_unSceneProgramID = CompileGLShader( 
 	//	"Scene",
 
@@ -1033,8 +1093,7 @@ bool CMainApplication::CreateAllShaders()
 		);
 
 
-	return m_unSceneProgramID != 0 
-		&& m_unControllerTransformProgramID != 0
+	return m_unControllerTransformProgramID != 0
 		&& m_unRenderModelProgramID != 0
 		&& m_unLensProgramID != 0;
 }
@@ -1574,16 +1633,50 @@ void CMainApplication::RenderScene( vr::Hmd_Eye nEye )
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
-
+	
 	if( m_bShowCubes )
 	{
-		//glUseProgram( m_unSceneProgramID );
-		skyboxShader.use();
-		glUniformMatrix4fv(glGetUniformLocation(skyboxShader.Program,"matric"), 1, GL_FALSE, GetCurrentViewProjectionMatrix(nEye).get());
-		glBindVertexArray(VertexArrayID);
-		glBindTexture(GL_TEXTURE_2D, Texture);
-		glDrawArrays( GL_TRIANGLES, 0, 36 );
-		glBindVertexArray( 0 );
+	//	SetLookat(0);
+		
+
+		Shader skyboxShader_1("./Triangle.vs", "./Triangle.frag");
+		glBindTexture(GL_TEXTURE_2D, Texture_left);
+		skyboxShader_1.use();
+		glBindVertexArray(skyVAO);
+		glDrawArrays(GL_TRIANGLES, 0,36);
+		glBindVertexArray(0);
+		glFlush();
+
+		//glUseProgram(skyboxShader);		
+		
+
+		//glBindBuffer(GL_ARRAY_BUFFER, leftEyeDesc.m_nRenderFramebufferId);
+		//glEnableVertexAttribArray(skyVAO);
+		//glVertexAttribPointer(
+		//	0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
+		//	3,                  // size
+		//	GL_FLOAT,           // type
+		//	GL_FALSE,           // normalized?
+		//	0,                  // stride
+		//	(void*)0            // array buffer offset
+		//	);
+		//glDrawArrays(GL_TRIANGLES, 0, 3); // Starting from vertex 0; 3 vertices total -> 1 triangle
+		//glDisableVertexAttribArray(skyVAO);
+		//glEnable(GL_TEXTURE_2D);
+		//glEnable(GL_BLEND);
+		//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+
+
+
+		//Sleep(30);
+		//glutPostRedisplay();
+		//glUseProgram(skyboxShader);
+
+
+
+
+
 	}
 
 	bool bIsInputCapturedByAnotherProcess = m_pHMD->IsInputFocusCapturedByAnotherProcess();
@@ -1709,11 +1802,128 @@ Matrix4 CMainApplication::GetCurrentViewProjectionMatrix( vr::Hmd_Eye nEye )
 	{
 		matMVP = m_mat4ProjectionRight * m_mat4eyePosRight *  m_mat4HMDPose;
 	}
-
+	
 	return matMVP;
 }
 
+Vector4  CMainApplication::GetLookat()
+{
+	Vector4 Lookat;
+	Lookat = Vector4(0, 1, 0, 0) * m_mat4HMDPose;
+	return Lookat;
+}
 
+GLuint CMainApplication::SetShader(const GLchar * frameSourcePath)
+{
+
+	string vertexCode;
+	string frameCode;
+	try{
+		//open the file
+		ifstream fShaderFile(frameSourcePath);
+
+		stringstream fShaderStream;
+		fShaderStream << fShaderFile.rdbuf();
+
+		fShaderFile.close();
+
+		frameCode = fShaderStream.str();
+	}
+
+	catch (exception e){
+		cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ\n";
+	}
+
+	const GLchar * fShaderCode = frameCode.c_str();
+
+	const GLubyte *renderer = glGetString(GL_RENDERER);
+	const GLubyte *vendor = glGetString(GL_VENDOR);
+	const GLubyte *version = glGetString(GL_VERSION);
+	const GLubyte *glslVersion =
+		glGetString(GL_SHADING_LANGUAGE_VERSION);
+	GLint major, minor;
+	glGetIntegerv(GL_MAJOR_VERSION, &major);
+	glGetIntegerv(GL_MINOR_VERSION, &minor);
+	cout << "GL Vendor    :" << vendor << endl;
+	cout << "GL Renderer  : " << renderer << endl;
+	cout << "GL Version (string)  : " << version << endl;
+	cout << "GL Version (integer) : " << major << "." << minor << endl;
+	cout << "GLSL Version : " << glslVersion << endl;
+
+
+	GLint success;
+	GLchar infoLog[512];
+
+
+	GLint fragmentShader;
+	fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+
+	glShaderSource(fragmentShader, 1, &fShaderCode, NULL);
+	glCompileShader(fragmentShader);
+
+	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
+	if (!success){
+		glGetShaderInfoLog(fragmentShader, sizeof(infoLog), NULL, infoLog);
+		cout << "ERROR::SHADER::FRAGMENT::COMPILEFAIL!\n" << infoLog;
+	}
+
+	GLuint Program;
+
+	Program = glCreateProgram();
+	glAttachShader(Program, fragmentShader);
+	glLinkProgram(Program);
+
+	glGetProgramiv(Program, GL_LINK_STATUS, &success);
+	if (!success){
+		glGetProgramInfoLog(Program, sizeof(infoLog), NULL, infoLog);
+		cout << "ERROR::SHADER::SHADERPROGRAM::LINK!\n" << infoLog;
+	}
+
+	glDeleteShader(fragmentShader);
+
+	return Program;
+}
+
+void CMainApplication::SetLookat(GLuint mytex)
+{
+	float pi = acos(-1);
+
+	Vector4 Lookat = GetLookat();
+	GLfloat rotate[3] = { Lookat[0] * pi * 2, Lookat[1] * pi * 2*0, Lookat[2] * pi * 2 };
+
+	GLfloat A = 100.0 * 2 * pi / 360;
+	GLfloat B = 70.0 * 2 * pi / 360;
+
+	//glUniform1i(glGetUniformLocation(skyboxShader, "tex"), mytex);
+
+	GLuint blockIndex = glGetUniformBlockIndex(skyboxShader, "Blocks");
+	if (blockIndex == GL_INVALID_INDEX)
+	{
+		printf("error");
+	}
+	GLint blockSize;
+	glGetActiveUniformBlockiv(skyboxShader, blockIndex, GL_UNIFORM_BLOCK_DATA_SIZE, &blockSize);
+	GLubyte *blockBuffer = (GLubyte*)malloc(blockSize);
+
+	const GLchar *names[] = { "A", "B", "rang" };
+	GLuint indices[3];
+	glGetUniformIndices(skyboxShader, 3, names, indices);
+
+	GLint offset[3];
+	glGetActiveUniformsiv(skyboxShader, 3, indices, GL_UNIFORM_OFFSET, offset);
+
+	memcpy(blockBuffer + offset[0], &A, sizeof(float));
+	memcpy(blockBuffer + offset[1], &B, sizeof(float));
+	memcpy(blockBuffer + offset[2], rotate, 3 * sizeof(float));
+
+	GLuint uboHandle;
+	glGenBuffers(1, &uboHandle);
+	glBindBuffer(GL_UNIFORM_BUFFER, uboHandle);
+	glBufferData(GL_UNIFORM_BUFFER, blockSize, blockBuffer, GL_DYNAMIC_DRAW);
+	glBindBufferBase(GL_UNIFORM_BUFFER, blockIndex, uboHandle);
+
+	free(blockBuffer);
+}
 //-----------------------------------------------------------------------------
 // Purpose:
 //-----------------------------------------------------------------------------
@@ -1891,51 +2101,51 @@ CGLRenderModel::~CGLRenderModel()
 bool CGLRenderModel::BInit( const vr::RenderModel_t & vrModel, const vr::RenderModel_TextureMap_t & vrDiffuseTexture )
 {
 	// create and bind a VAO to hold state for this model
-	glGenVertexArrays( 1, &m_glVertArray );
-	glBindVertexArray( m_glVertArray );
+	//glGenVertexArrays( 1, &m_glVertArray );
+	//glBindVertexArray( m_glVertArray );
 
 	// Populate a vertex buffer
-	glGenBuffers( 1, &m_glVertBuffer );
-	glBindBuffer( GL_ARRAY_BUFFER, m_glVertBuffer );
-	glBufferData( GL_ARRAY_BUFFER, sizeof( vr::RenderModel_Vertex_t ) * vrModel.unVertexCount, vrModel.rVertexData, GL_STATIC_DRAW );
+	//glGenBuffers( 1, &m_glVertBuffer );
+	//glBindBuffer( GL_ARRAY_BUFFER, m_glVertBuffer );
+	//glBufferData( GL_ARRAY_BUFFER, sizeof( vr::RenderModel_Vertex_t ) * vrModel.unVertexCount, vrModel.rVertexData, GL_STATIC_DRAW );
 
 	// Identify the components in the vertex buffer
-	glEnableVertexAttribArray( 0 );
-	glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, sizeof( vr::RenderModel_Vertex_t ), (void *)offsetof( vr::RenderModel_Vertex_t, vPosition ) );
-	glEnableVertexAttribArray( 1 );
-	glVertexAttribPointer( 1, 3, GL_FLOAT, GL_FALSE, sizeof( vr::RenderModel_Vertex_t ), (void *)offsetof( vr::RenderModel_Vertex_t, vNormal ) );
-	glEnableVertexAttribArray( 2 );
-	glVertexAttribPointer( 2, 2, GL_FLOAT, GL_FALSE, sizeof( vr::RenderModel_Vertex_t ), (void *)offsetof( vr::RenderModel_Vertex_t, rfTextureCoord ) );
+	//glEnableVertexAttribArray( 0 );
+	//glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, sizeof( vr::RenderModel_Vertex_t ), (void *)offsetof( vr::RenderModel_Vertex_t, vPosition ) );
+	//glEnableVertexAttribArray( 1 );
+	//glVertexAttribPointer( 1, 3, GL_FLOAT, GL_FALSE, sizeof( vr::RenderModel_Vertex_t ), (void *)offsetof( vr::RenderModel_Vertex_t, vNormal ) );
+	//glEnableVertexAttribArray( 2 );
+	//glVertexAttribPointer( 2, 2, GL_FLOAT, GL_FALSE, sizeof( vr::RenderModel_Vertex_t ), (void *)offsetof( vr::RenderModel_Vertex_t, rfTextureCoord ) );
 
 	// Create and populate the index buffer
-	glGenBuffers( 1, &m_glIndexBuffer );
-	glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, m_glIndexBuffer );
-	glBufferData( GL_ELEMENT_ARRAY_BUFFER, sizeof( uint16_t ) * vrModel.unTriangleCount * 3, vrModel.rIndexData, GL_STATIC_DRAW );
+	//glGenBuffers( 1, &m_glIndexBuffer );
+	//glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, m_glIndexBuffer );
+	//glBufferData( GL_ELEMENT_ARRAY_BUFFER, sizeof( uint16_t ) * vrModel.unTriangleCount * 3, vrModel.rIndexData, GL_STATIC_DRAW );
 
-	glBindVertexArray( 0 );
+	//glBindVertexArray( 0 );
 
 	// create and populate the texture
-	glGenTextures(1, &m_glTexture );
-	glBindTexture( GL_TEXTURE_2D, m_glTexture );
+	//glGenTextures(1, &m_glTexture );
+	//glBindTexture( GL_TEXTURE_2D, m_glTexture );
 
-	glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, vrDiffuseTexture.unWidth, vrDiffuseTexture.unHeight,
-		0, GL_RGBA, GL_UNSIGNED_BYTE, vrDiffuseTexture.rubTextureMapData );
+	//glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, vrDiffuseTexture.unWidth, vrDiffuseTexture.unHeight,
+	//	0, GL_RGBA, GL_UNSIGNED_BYTE, vrDiffuseTexture.rubTextureMapData );
 
-	// If this renders black ask McJohn what's wrong.
-	glGenerateMipmap(GL_TEXTURE_2D);
+	//// If this renders black ask McJohn what's wrong.
+	//glGenerateMipmap(GL_TEXTURE_2D);
 
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+	//glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+	//glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+	//glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+	//glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
 
-	GLfloat fLargest;
-	glGetFloatv( GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &fLargest );
-	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, fLargest );
+	//GLfloat fLargest;
+	//glGetFloatv( GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &fLargest );
+	//glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, fLargest );
 
-	glBindTexture( GL_TEXTURE_2D, 0 );
+	//glBindTexture( GL_TEXTURE_2D, 0 );
 
-	m_unVertexCount = vrModel.unTriangleCount * 3;
+	//m_unVertexCount = vrModel.unTriangleCount * 3;
 
 	return true;
 }
@@ -1963,14 +2173,14 @@ void CGLRenderModel::Cleanup()
 //-----------------------------------------------------------------------------
 void CGLRenderModel::Draw()
 {
-	glBindVertexArray( m_glVertArray );
+	//glBindVertexArray( m_glVertArray );
 
-	glActiveTexture( GL_TEXTURE0 );
-	glBindTexture( GL_TEXTURE_2D, m_glTexture );
+	//glActiveTexture( GL_TEXTURE0 );
+	//glBindTexture( GL_TEXTURE_2D, m_glTexture );
 
-	glDrawElements( GL_TRIANGLES, m_unVertexCount, GL_UNSIGNED_SHORT, 0 );
+	//glDrawElements( GL_TRIANGLES, m_unVertexCount, GL_UNSIGNED_SHORT, 0 );
 
-	glBindVertexArray( 0 );
+	//glBindVertexArray( 0 );
 }
 
 
