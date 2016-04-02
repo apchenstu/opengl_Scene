@@ -27,71 +27,14 @@ GLuint Texture_left,Texture_right;
 unsigned char * TextureImage;
 std::vector<const GLchar*> TextureImage_c;
 GLfloat vertices[] = {
-	//-1.0f, -1.0f, 0.0f,
-	//1.0f, -1.0f, 0.0f,
-	//0.0f, 1.0f, 0.0f,
-
-	-1.0f, -1.0f, -1.0f, 0.0f, 0.0f,
-	1.0f, -1.0f, -1.0f, 1.0f, 0.0f,
-	1.0f, 1.0f, -1.0f, 1.0f, 1.0f,
-	1.0f, 1.0f, -1.0f, 1.0f, 1.0f,
-	-1.0f, 1.0f, -1.0f, 0.0f, 1.0f,
-	-1.0f, -1.0f, -1.0f, 0.0f, 0.0f,
-
-	-1.0f, -1.0f, 1.0f, 0.0f, 0.0f,
-	1.0f, -1.0f, 1.0f, 1.0f, 0.0f,
-	1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-	1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-	-1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
-	-1.0f, -1.0f, 1.0f, 0.0f, 0.0f,
-
-	-1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
-	-1.0f, 1.0f, -1.0f, 1.0f, 1.0f,
-	-1.0f, -1.0f, -1.0f, 0.0f, 1.0f,
-	-1.0f, -1.0f, -1.0f, 0.0f, 1.0f,
-	-1.0f, -1.0f, 1.0f, 0.0f, 0.0f,
-	-1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
-
-	1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
-	1.0f, 1.0f, -1.0f, 1.0f, 1.0f,
-	1.0f, -1.0f, -1.0f, 0.0f, 1.0f,
-	1.0f, -1.0f, -1.0f, 0.0f, 1.0f,
-	1.0f, -1.0f, 1.0f, 0.0f, 0.0f,
-	1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
-
-	-1.0f, -1.0f, -1.0f, 0.0f, 1.0f,
-	1.0f, -1.0f, -1.0f, 1.0f, 1.0f,
-	1.0f, -1.0f, 1.0f, 1.0f, 0.0f,
-	1.0f, -1.0f, 1.0f, 1.0f, 0.0f,
-	-1.0f, -1.0f, 1.0f, 0.0f, 0.0f,
-	-1.0f, -1.0f, -1.0f, 0.0f, 1.0f,
-
-	-1.0f, 1.0f, -1.0f, 0.0f, 1.0f,
-	1.0f, 1.0f, -1.0f, 1.0f, 1.0f,
-	1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
-	1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
-	-1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
-	-1.0f, 1.0f, -1.0f, 0.0f, 1.0f
+	-1, -1, 0.0f, 0, 1.0,
+	-1, 1, 0.0f, 0, 0.0,
+	1, 1, 0.0f, 1.0, 0.0,
+	1, 1, 0.0f, 1.0, 0.0,
+	1, -1, 0.0f, 1.0, 1.0,
+	-1, -1, 0.0f, 0, 1.0,
 };
-GLuint indices[] = {  // Note that we start from 0!
-	0, 1, 3, // First Triangle
-	1, 2, 3,  // Second Triangle
 
-	//4, 5, 7,
-	//5, 6, 7,
-
-	//8, 9, 11,
-	//9, 11, 10,
-
-	//12, 13, 15,
-	//13, 15, 16,
-
-	//16, 17, 19,
-	//17, 19, 18,
-
-	//20, 21, 23,
-	//21, 23, 22
-};
 void LoadTexture();
 
 class CGLRenderModel
@@ -561,8 +504,8 @@ bool CMainApplication::BInitGL()
 	glEnableVertexAttribArray(1);
 
 	
-	glBindVertexArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
+//	glBindVertexArray(0);
+//	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	
 
 	LoadTexture();
@@ -1638,45 +1581,29 @@ void CMainApplication::RenderScene( vr::Hmd_Eye nEye )
 	{
 	//	SetLookat(0);
 		
-
-		Shader skyboxShader_1("./Triangle.vs", "./Triangle.frag");
 		glBindTexture(GL_TEXTURE_2D, Texture_left);
+		Shader skyboxShader_1("./Triangle.vs", "./Triangle.frag");
 		skyboxShader_1.use();
 		glBindVertexArray(skyVAO);
-		glDrawArrays(GL_TRIANGLES, 0,36);
+		glDrawArrays(GL_TRIANGLES, 0,6);
 		glBindVertexArray(0);
 		glFlush();
+	
 
-		//glUseProgram(skyboxShader);		
-		
-
-		//glBindBuffer(GL_ARRAY_BUFFER, leftEyeDesc.m_nRenderFramebufferId);
-		//glEnableVertexAttribArray(skyVAO);
-		//glVertexAttribPointer(
-		//	0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
-		//	3,                  // size
-		//	GL_FLOAT,           // type
-		//	GL_FALSE,           // normalized?
-		//	0,                  // stride
-		//	(void*)0            // array buffer offset
-		//	);
-		//glDrawArrays(GL_TRIANGLES, 0, 3); // Starting from vertex 0; 3 vertices total -> 1 triangle
-		//glDisableVertexAttribArray(skyVAO);
-		//glEnable(GL_TEXTURE_2D);
-		//glEnable(GL_BLEND);
-		//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-
-
-
-		//Sleep(30);
-		//glutPostRedisplay();
+		//glBindTexture(GL_TEXTURE_2D, Texture_left);
 		//glUseProgram(skyboxShader);
-
-
-
-
-
+		//glBegin(GL_POLYGON);
+		//	glTexCoord2f(0, 1.0);
+		//	glVertex3f(-1, -0.5, 0.0f);
+		//	glTexCoord2f(0, 0.0);
+		//	glVertex3f(-1, 0.5, 0.0f);
+		//
+		//	glTexCoord2f(1.0, 0.0);
+		//	glVertex3f(0, 0.5, 0.0f);
+		//	glTexCoord2f(1.0, 1.0);
+		//	glVertex3f(0, -0.5, 0.0f);
+		//glEnd();
+		//glFlush();
 	}
 
 	bool bIsInputCapturedByAnotherProcess = m_pHMD->IsInputFocusCapturedByAnotherProcess();
