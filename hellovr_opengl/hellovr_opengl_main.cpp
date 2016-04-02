@@ -92,7 +92,6 @@ public:
 	bool SetupStereoRenderTargets();
 	void SetupDistortion();
 	void SetupCameras();
-	void SetLookat(GLuint mytex);
 	GLuint SetShader(const GLchar * frameSourcePath);
 
 	void RenderStereoTargets();
@@ -1584,6 +1583,7 @@ void CMainApplication::RenderScene( vr::Hmd_Eye nEye )
 		glBindTexture(GL_TEXTURE_2D, Texture_left);
 		Shader skyboxShader_1("./Triangle.vs", "./Triangle.frag");
 		skyboxShader_1.use();
+		glUniformMatrix4fv(glGetUniformLocation(skyboxShader_1.Program,"view"), 1, GL_FALSE, m_mat4HMDPose.get());
 		glBindVertexArray(skyVAO);
 		glDrawArrays(GL_TRIANGLES, 0,6);
 		glBindVertexArray(0);
@@ -1811,46 +1811,7 @@ GLuint CMainApplication::SetShader(const GLchar * frameSourcePath)
 	return Program;
 }
 
-void CMainApplication::SetLookat(GLuint mytex)
-{
-	float pi = acos(-1);
 
-	Vector4 Lookat = GetLookat();
-	GLfloat rotate[3] = { Lookat[0] * pi * 2, Lookat[1] * pi * 2*0, Lookat[2] * pi * 2 };
-
-	GLfloat A = 100.0 * 2 * pi / 360;
-	GLfloat B = 70.0 * 2 * pi / 360;
-
-	//glUniform1i(glGetUniformLocation(skyboxShader, "tex"), mytex);
-
-	GLuint blockIndex = glGetUniformBlockIndex(skyboxShader, "Blocks");
-	if (blockIndex == GL_INVALID_INDEX)
-	{
-		printf("error");
-	}
-	GLint blockSize;
-	glGetActiveUniformBlockiv(skyboxShader, blockIndex, GL_UNIFORM_BLOCK_DATA_SIZE, &blockSize);
-	GLubyte *blockBuffer = (GLubyte*)malloc(blockSize);
-
-	const GLchar *names[] = { "A", "B", "rang" };
-	GLuint indices[3];
-	glGetUniformIndices(skyboxShader, 3, names, indices);
-
-	GLint offset[3];
-	glGetActiveUniformsiv(skyboxShader, 3, indices, GL_UNIFORM_OFFSET, offset);
-
-	memcpy(blockBuffer + offset[0], &A, sizeof(float));
-	memcpy(blockBuffer + offset[1], &B, sizeof(float));
-	memcpy(blockBuffer + offset[2], rotate, 3 * sizeof(float));
-
-	GLuint uboHandle;
-	glGenBuffers(1, &uboHandle);
-	glBindBuffer(GL_UNIFORM_BUFFER, uboHandle);
-	glBufferData(GL_UNIFORM_BUFFER, blockSize, blockBuffer, GL_DYNAMIC_DRAW);
-	glBindBufferBase(GL_UNIFORM_BUFFER, blockIndex, uboHandle);
-
-	free(blockBuffer);
-}
 //-----------------------------------------------------------------------------
 // Purpose:
 //-----------------------------------------------------------------------------
