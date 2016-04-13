@@ -42,19 +42,19 @@ public:
 		const GLchar * vShaderCode = vertexCode.c_str();
 		const GLchar * fShaderCode = frameCode.c_str();
 
-		const GLubyte *renderer = glGetString(GL_RENDERER);
-		const GLubyte *vendor = glGetString(GL_VENDOR);
-		const GLubyte *version = glGetString(GL_VERSION);
-		const GLubyte *glslVersion =
-		glGetString(GL_SHADING_LANGUAGE_VERSION);
-		GLint major, minor;
-		glGetIntegerv(GL_MAJOR_VERSION, &major);
-		glGetIntegerv(GL_MINOR_VERSION, &minor);
-		cout << "GL Vendor    :" << vendor << endl;
-		cout << "GL Renderer  : " << renderer << endl;
-		cout << "GL Version (string)  : " << version << endl;
-		cout << "GL Version (integer) : " << major << "." << minor << endl;
-		cout << "GLSL Version : " << glslVersion << endl;
+		//const GLubyte *renderer = glGetString(GL_RENDERER);
+		//const GLubyte *vendor = glGetString(GL_VENDOR);
+		//const GLubyte *version = glGetString(GL_VERSION);
+		//const GLubyte *glslVersion =
+		//glGetString(GL_SHADING_LANGUAGE_VERSION);
+		//GLint major, minor;
+		//glGetIntegerv(GL_MAJOR_VERSION, &major);
+		//glGetIntegerv(GL_MINOR_VERSION, &minor);
+		//cout << "GL Vendor    :" << vendor << endl;
+		//cout << "GL Renderer  : " << renderer << endl;
+		//cout << "GL Version (string)  : " << version << endl;
+		//cout << "GL Version (integer) : " << major << "." << minor << endl;
+		//cout << "GLSL Version : " << glslVersion << endl;
 
 
 		GLuint VertexShader;
